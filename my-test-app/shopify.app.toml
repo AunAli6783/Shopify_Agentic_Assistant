@@ -1,13 +1,13 @@
 # Learn more about configuring your app at https://shopify.dev/docs/apps/tools/cli/configuration
 
-client_id = "9b8f18be7b92e87e3ab89d221e2660b8"
-name = "my-test-app"
+client_id = "e288fbe26307a21b83f7c0443e1d8fce"
+name = "Python_Agent"
 application_url = "https://example.com"
 embedded = true
 
 [access_scopes]
 # Learn more at https://shopify.dev/docs/apps/tools/cli/configuration#access_scopes
-scopes = "write_products"
+scopes = "write_products,read_products,write_orders,read_orders,write_inventory,read_inventory,write_customers,read_customers"
 
 [webhooks]
 api_version = "2026-10"
@@ -21,8 +21,10 @@ api_version = "2026-10"
   topics = [ "app/scopes_update" ]
 
 [auth]
-redirect_urls = [ "https://example.com/api/auth" ]
+redirect_urls = [
+  "https://example.com",
+  "https://example.com/api/auth"
+]
 
 [build]
-include_config_on_deploy = true
 automatically_update_urls_on_dev = true

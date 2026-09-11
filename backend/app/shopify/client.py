@@ -58,6 +58,37 @@ class ShopifyGraphQLClient:
             self.access_token = data.get("access_token", "")
             return self.access_token
 
+    def exchange_code_for_token(self, code: str) -> str:
+        """Exchanges an authorization code for a permanent access token and persists it to .env."""
+        payload = {
+            "client_id": self.client_id,
+            "client_secret": self.client_secret,
+            "code": code.strip()
+        }
+        with httpx.Client(timeout=self.timeout) as client:
+            resp = client.post(self.token_exchange_url, json=payload)
+            if resp.status_code != 200:
+                raise ShopifyAPIError(f"OAuth code exchange failed ({resp.status_code}): {resp.text}")
+            data = resp.json()
+            token = data.get("access_token", "")
+            if token:
+                self.access_token = token
+                # Update .env file automatically
+                env_path = settings.model_config.get("env_file")
+                if env_path:
+                    from pathlib import Path
+                    p = Path(env_path)
+                    if p.exists():
+                        content = p.read_text(encoding="utf-8")
+                        import re
+                        new_content = re.sub(
+                            r"SHOPIFY_ADMIN_ACCESS_TOKEN=.*",
+                            f"SHOPIFY_ADMIN_ACCESS_TOKEN={token}",
+                            content
+                        )
+                        p.write_text(new_content, encoding="utf-8")
+            return token
+
     def _get_headers(self) -> Dict[str, str]:
         if not self.access_token and self.client_id and self.client_secret:
             self.fetch_access_token()
